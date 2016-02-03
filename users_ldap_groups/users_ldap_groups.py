@@ -36,12 +36,22 @@ class LDAPOperator(models.AbstractModel):
         return ('contains', 'equals', 'query')
 
     def contains(self, ldap_entry, attribute, value, ldap_config, company):
-        return (attribute in ldap_entry[1]) and \
-            (value in ldap_entry[1][attribute])
+        if attribute in ldap_entry[1]:
+            if type(ldap_entry[1][attribute]) == type([]):
+                ldap_value = ldap_entry[1][attribute][0]
+            else:
+                ldap_value = ldap_entry[1][attribute]
+            return value in ldap_value
+        return False
 
     def equals(self, ldap_entry, attribute, value, ldap_config, company):
-        return attribute in ldap_entry[1] and \
-            unicode(value) == unicode(ldap_entry[1][attribute])
+        if attribute in ldap_entry[1]:
+            if type(ldap_entry[1][attribute]) == type([]):
+                ldap_value = ldap_entry[1][attribute][0]
+            else:
+                ldap_value = ldap_entry[1][attribute]
+            return unicode(value) == unicode(ldap_value)
+        return False
 
     def query(self, ldap_entry, attribute, value, ldap_config, company):
         query_string = Template(value).safe_substitute(dict(
